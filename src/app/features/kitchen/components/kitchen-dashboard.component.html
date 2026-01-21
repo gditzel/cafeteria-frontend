@@ -1,0 +1,64 @@
+<div class="min-h-screen bg-slate-50 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">👨‍🍳 Monitor de Cocina</h1>
+      <p class="text-slate-500 mt-1">Pedidos en espera de preparación</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-slate-600">Conectado en tiempo real</span>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div *ngFor="let order of pendingOrders"
+         class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden hover:shadow-md transition-shadow">
+
+      <div class="bg-amber-50 px-5 py-4 border-b border-amber-100 flex justify-between items-center">
+        <span class="text-amber-800 font-bold text-lg">Mesa {{order.table.number}}</span>
+        <span class="text-xs font-mono text-amber-600 bg-white px-2 py-1 rounded border border-amber-200">#{{order.id}}</span>
+      </div>
+
+      <div class="p-5 flex-grow">
+        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Productos:</h3>
+        <ul class="space-y-3">
+          <li *ngFor="let item of order.items" class="flex items-start gap-3 text-slate-700">
+            <span class="flex-shrink-0 w-8 h-8 rounded bg-slate-100 flex items-center justify-center font-bold text-sm text-slate-600">
+              {{item.quantity}}
+            </span>
+            <span class="pt-1 text-sm font-medium">
+              {{ item.product.translations && item.product.translations.length > 0 ? item.product.translations[0].name : 'Producto sin nombre' }}
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="p-5 bg-slate-50 border-t border-slate-100">
+        <button
+          (click)="markAsReady(order.id)"
+          [disabled]="loadingOrderId === order.id"
+          class="w-full py-3 px-4 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2"
+          [ngClass]="loadingOrderId === order.id ? 'bg-slate-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98]'">
+
+          <span *ngIf="loadingOrderId !== order.id">✅ LISTO PARA MOZO</span>
+          <span *ngIf="loadingOrderId === order.id" class="flex items-center gap-2">
+            <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Procesando...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="pendingOrders.length === 0" class="max-w-md mx-auto mt-20 text-center p-10 bg-white rounded-3xl border border-dashed border-slate-300">
+    <div class="text-5xl mb-4">😌</div>
+    <h2 class="text-xl font-bold text-slate-800">¡Todo despejado!</h2>
+    <p class="text-slate-500 mt-2">No hay órdenes pendientes en este momento. Buen trabajo.</p>
+  </div>
+</div>

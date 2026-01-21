@@ -1,0 +1,34 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Category } from '../features/models/category.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CategoryService {
+  private apiUrl = 'http://localhost:8080/api/categories';
+
+  constructor(private http: HttpClient) {}
+
+  getCategories(): Observable<Category[]> {
+    return this.http.get<Category[]>(this.apiUrl);
+  }
+
+  getActiveCategories(): Observable<Category[]> {
+    return this.http.get<Category[]>(`${this.apiUrl}/active`);
+  }
+
+  saveCategory(category: Category): Observable<Category> {
+    return this.http.post<Category>(this.apiUrl, category);
+  }
+
+  // Agregamos el método para subir/bajar
+  reorderCategory(id: number, direction: 'up' | 'down'): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${id}/reorder?direction=${direction}`, {});
+  }
+
+  deleteCategory(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+}

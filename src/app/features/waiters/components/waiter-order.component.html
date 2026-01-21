@@ -1,0 +1,99 @@
+<div class="min-h-screen bg-slate-900 text-white p-6 pb-40">
+  <div class="flex justify-between items-start mb-8">
+    <div>
+      <h1 class="text-3xl font-black italic">MESA {{ tableId }}</h1>
+      <p class="text-orange-500 text-[10px] font-black uppercase italic tracking-widest">Gestión de Mesa</p>
+    </div>
+    <button *ngIf="activeOrder" (click)="showCloseModal = true"
+            class="bg-rose-600 px-5 py-2.5 rounded-2xl font-black text-[10px] uppercase shadow-xl italic">
+      Cerrar Mesa
+    </button>
+  </div>
+
+  <div *ngIf="activeOrder" class="mb-10 bg-slate-800/40 rounded-[2.5rem] p-7 border border-slate-700/50">
+    <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-5">Consumo Acumulado</h2>
+    <div class="space-y-4">
+      <div *ngFor="let item of activeOrder.items" class="flex justify-between items-center font-bold">
+        <div class="flex items-center gap-3">
+          <span class="bg-orange-500/20 text-orange-500 px-2 py-1 rounded-lg text-xs font-black">{{ item.quantity }}x</span>
+          <span class="text-slate-300 text-sm italic">{{ item.product.translations[0]?.name }}</span>
+        </div>
+        <span class="text-orange-500 text-sm font-black">${{ item.subtotal }}</span>
+      </div>
+      <div class="pt-4 border-t border-slate-700/50 flex justify-between items-center">
+        <span class="text-white font-black uppercase italic text-xs">Total</span>
+        <span class="text-3xl font-black text-emerald-500 tracking-tighter">${{ activeOrder.total }}</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 italic">Añadir</h2>
+  <div class="space-y-4">
+    <div *ngFor="let p of products" class="bg-slate-800 p-4 rounded-[2.5rem] border border-slate-700 flex justify-between items-center shadow-xl">
+      <div class="flex items-center gap-4">
+        <img [src]="'http://localhost:8080/api/products/' + p.id + '/image'"
+             alt="Producto"
+             class="w-16 h-16 rounded-[1.5rem] object-cover bg-slate-900 border border-slate-700 shadow-inner"
+             onerror="this.src='assets/placeholder.png';">
+
+        <div>
+          <h3 class="font-bold text-lg leading-tight">{{ p.translations[0]?.name }}</h3>
+          <p class="text-orange-500 font-black italic text-sm">${{ p.price }}</p>
+          <p class="text-[9px] font-bold uppercase tracking-widest mt-1"
+             [ngClass]="p.stock > 0 ? 'text-slate-500' : 'text-rose-500'">
+            Stock: {{ p.stock > 0 ? p.stock + ' disponibles' : 'Agotado' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 bg-slate-900 rounded-[1.5rem] p-2 border border-slate-700">
+        <button (click)="removeItem(p)" class="w-10 h-10 text-2xl font-black text-slate-500 hover:text-white transition-colors">-</button>
+        <span class="text-orange-500 font-black text-xl min-w-[24px] text-center">{{ getQuantity(p.id) }}</span>
+        <button (click)="addItem(p)"
+                [disabled]="getQuantity(p.id) >= p.stock"
+                class="w-10 h-10 text-2xl font-black text-emerald-500 hover:scale-110 transition-transform disabled:opacity-20 disabled:grayscale disabled:scale-100">
+          +
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="fixed bottom-0 left-0 right-0 p-6 bg-slate-900/90 backdrop-blur-xl border-t border-slate-800/50">
+    <button (click)="sendOrder()" [disabled]="cart.length === 0"
+            class="w-full py-5 bg-orange-600 disabled:bg-slate-800 text-white font-black text-xl rounded-[2.2rem] shadow-2xl transition-all uppercase italic active:scale-95">
+      {{ activeOrder ? 'ACTUALIZAR PEDIDO' : 'ENVIAR PEDIDO' }} (${{ calculateTotal() }})
+    </button>
+  </div>
+</div>
+
+<div *ngIf="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md"></div>
+  <div class="bg-white rounded-[3rem] shadow-2xl max-w-sm w-full p-10 relative z-10 text-center">
+    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-black">✓</div>
+    <h3 class="text-3xl font-black text-slate-900 mb-2 italic">¡Enviado!</h3>
+    <p class="text-slate-400 mb-10 font-medium">El pedido ya está en cocina.</p>
+    <button (click)="closeSuccessAndNavigate()"
+            class="w-full py-5 bg-slate-900 text-white font-black rounded-3xl shadow-xl uppercase italic">
+      Volver al Salón
+    </button>
+  </div>
+</div>
+
+<div *ngIf="showCloseModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md"></div>
+  <div class="bg-white rounded-[3rem] shadow-2xl max-w-sm w-full p-10 relative z-10 text-center">
+    <div class="w-20 h-20 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-black">!</div>
+    <h3 class="text-3xl font-black text-slate-900 mb-2 italic">¿Cerrar Mesa?</h3>
+    <p class="text-slate-400 mb-10 font-medium">Se finalizará la cuenta y la mesa quedará libre.</p>
+    <div class="space-y-3">
+      <button (click)="confirmClose()"
+              class="w-full py-5 bg-rose-600 text-white font-black rounded-3xl shadow-xl uppercase italic">
+        CONFIRMAR CIERRE
+      </button>
+      <button (click)="showCloseModal = false"
+              class="w-full py-5 bg-slate-100 text-slate-500 font-black rounded-3xl uppercase italic">
+        CANCELAR
+      </button>
+    </div>
+  </div>
+</div>

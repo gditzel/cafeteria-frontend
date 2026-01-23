@@ -1,0 +1,13 @@
+---
+description: Testing por capa en arquitectura hexagonal
+alwaysApply: true
+---
+
+# Testing por capa
+
+- `domain/`: tests unitarios puros, sin Angular ni HTTP.
+- `application/`: tests unitarios con puertos mockeados.
+- `infrastructure/`: tests de integración (HTTP/storage) con adapters reales.
+- `adapters/`: tests de componentes/páginas con mocks de casos de uso.
+
+Evitar tests de UI acoplados a infraestructura concreta.

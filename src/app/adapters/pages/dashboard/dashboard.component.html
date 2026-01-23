@@ -1,0 +1,54 @@
+<div class="bg-slate-50 pt-12 pb-8 px-6 flex flex-col items-center">
+  <div class="max-w-6xl w-full">
+
+    <div class="text-center mb-10">
+      <h1 class="text-5xl font-black text-slate-900 uppercase italic tracking-tighter mb-2">
+        ¡Hola, {{ userName }}!
+      </h1>
+      <p class="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px]">
+        Bienvenido al panel de control de tu cafetería
+      </p>
+      <div class="h-1 w-16 bg-orange-500 mx-auto mt-4 rounded-full shadow-sm shadow-orange-200"></div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+      <div routerLink="/admin/productos/nuevo"
+           class="group bg-white p-8 rounded-[2rem] shadow-lg shadow-slate-200/40 border border-slate-50 hover:scale-105 transition-all cursor-pointer flex flex-col items-center justify-center text-center">
+        <div class="w-14 h-14 bg-orange-500 text-white rounded-2xl flex items-center justify-center mb-4 shadow-md shadow-orange-200 group-hover:rotate-6 transition-transform">
+          <i class="fas fa-plus text-xl"></i>
+        </div>
+        <h3 class="text-base font-black text-slate-800 uppercase italic tracking-tight leading-tight">Nuevo Producto</h3>
+        <p class="text-[9px] text-slate-400 font-black uppercase mt-1 tracking-widest">Carga rápida</p>
+      </div>
+
+      <div routerLink="/admin/categorias"
+           class="group bg-white p-8 rounded-[2rem] shadow-lg shadow-slate-200/40 border border-slate-50 hover:scale-105 transition-all cursor-pointer flex flex-col items-center justify-center text-center">
+        <div class="w-14 h-14 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-orange-500 group-hover:text-white transition-all">
+          <i class="fas fa-th-large text-xl"></i>
+        </div>
+        <h3 class="text-base font-black text-slate-800 uppercase italic tracking-tight leading-tight">Categorías</h3>
+        <p class="text-[9px] text-slate-400 font-black uppercase mt-1 tracking-widest">Gestionar secciones</p>
+      </div>
+
+      <div routerLink="/admin/mozos"
+           class="group bg-white p-8 rounded-[2rem] shadow-lg shadow-slate-200/40 border border-slate-50 hover:scale-105 transition-all cursor-pointer flex flex-col items-center justify-center text-center">
+        <div class="w-14 h-14 bg-blue-100 text-blue-500 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-blue-500 group-hover:text-white transition-all">
+          <i class="fas fa-user-friends text-xl"></i>
+        </div>
+        <h3 class="text-base font-black text-slate-800 uppercase italic tracking-tight leading-tight">Personal</h3>
+        <p class="text-[9px] text-slate-400 font-black uppercase mt-1 tracking-widest">Gestionar Mozos</p>
+      </div>
+
+      <div routerLink="/menu"
+           class="group bg-white p-8 rounded-[2rem] shadow-lg shadow-slate-200/40 border-2 border-dashed border-emerald-50 hover:scale-105 transition-all cursor-pointer flex flex-col items-center justify-center text-center">
+        <div class="w-14 h-14 bg-emerald-100 text-emerald-500 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+          <i class="fas fa-qrcode text-xl"></i>
+        </div>
+        <h3 class="text-base font-black text-slate-800 uppercase italic tracking-tight leading-tight">Vista Cliente</h3>
+        <p class="text-[9px] text-slate-400 font-black uppercase mt-1 tracking-widest">Ver Carta Pública</p>
+      </div>
+
+    </div>
+  </div>
+</div>

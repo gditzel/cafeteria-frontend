@@ -1,0 +1,80 @@
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h2 class="text-3xl font-black text-slate-800 italic uppercase tracking-tighter">Categorías</h2>
+      <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Administración de carta</p>
+    </div>
+    <button (click)="openCreateModal()" class="bg-orange-500 hover:bg-orange-600 text-white font-black py-3 px-8 rounded-2xl shadow-lg transition-all active:scale-95">
+      + NUEVA CATEGORÍA
+    </button>
+  </div>
+
+  <div class="bg-white shadow-2xl rounded-[2rem] overflow-hidden border border-slate-100">
+    <table class="min-w-full">
+      <thead class="bg-slate-50 border-b border-slate-100">
+      <tr>
+        <th class="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre</th>
+        <th class="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Estado</th>
+        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Acciones</th>
+      </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+      <tr *ngFor="let c of categories; let first = first; let last = last" class="hover:bg-slate-50/50 transition-colors">
+        <td class="px-8 py-6">
+          <div class="flex flex-col">
+            <span class="text-lg font-bold text-slate-700">{{ getName(c, 'es') }}</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ c.productCount || 0 }} productos asociados</span>
+          </div>
+        </td>
+        <td class="px-8 py-6 text-center">
+          <button (click)="toggleStatus(c)" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors" [ngClass]="c.isActive ? 'bg-orange-500' : 'bg-slate-200'">
+            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" [ngClass]="c.isActive ? 'translate-x-6' : 'translate-x-1'"></span>
+          </button>
+        </td>
+        <td class="px-8 py-6 text-right">
+          <div class="flex justify-end gap-2">
+            <div class="flex bg-slate-100 rounded-xl p-1">
+              <button (click)="moveUp(c)" [disabled]="first" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-orange-500 disabled:opacity-20"><i class="fas fa-chevron-up"></i></button>
+              <button (click)="moveDown(c)" [disabled]="last" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-orange-500 disabled:opacity-20"><i class="fas fa-chevron-down"></i></button>
+            </div>
+            <button (click)="openEditModal(c)" class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl hover:bg-blue-600 hover:text-white transition-all"><i class="fas fa-pencil-alt"></i></button>
+            <button (click)="openDeleteModal(c)" [disabled]="hasProducts(c)" class="w-10 h-10 rounded-xl transition-all" [ngClass]="hasProducts(c) ? 'bg-slate-50 text-slate-300' : 'bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white'"><i class="fas fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div *ngIf="showFormModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl">
+    <h3 class="text-2xl font-black text-slate-800 mb-6 uppercase italic">{{ isEditMode ? 'Editar' : 'Nueva' }} Categoría</h3>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Nombre (Español)</label>
+        <input [(ngModel)]="categoryForm.nameEs" type="text" class="w-full bg-slate-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-orange-500">
+      </div>
+      <div>
+        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Nombre (Inglés)</label>
+        <input [(ngModel)]="categoryForm.nameEn" type="text" class="w-full bg-slate-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-orange-500">
+      </div>
+    </div>
+    <div class="flex gap-3 mt-8">
+      <button (click)="showFormModal = false" class="flex-1 py-3 font-bold text-slate-400 hover:text-slate-600">Cancelar</button>
+      <button (click)="saveCategory()" class="flex-1 bg-orange-500 text-white font-black py-3 rounded-xl shadow-lg">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-[2rem] w-full max-w-sm p-8 text-center shadow-2xl">
+    <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fas fa-exclamation-triangle"></i></div>
+    <h3 class="text-xl font-black text-slate-800 uppercase mb-2">¿Eliminar categoría?</h3>
+    <p class="text-slate-500 text-sm mb-8">Esta acción no se puede deshacer.</p>
+    <div class="flex gap-3">
+      <button (click)="showDeleteModal = false" class="flex-1 py-3 font-bold text-slate-400">Cancelar</button>
+      <button (click)="confirmDelete()" class="flex-1 bg-rose-500 text-white font-black py-3 rounded-xl shadow-lg shadow-rose-200">Eliminar</button>
+    </div>
+  </div>
+</div>

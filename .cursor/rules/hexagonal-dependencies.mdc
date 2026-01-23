@@ -1,0 +1,24 @@
+---
+description: Reglas de dependencias entre capas hexagonales
+alwaysApply: true
+---
+
+# Dependencias entre capas
+
+- `domain/` no importa nada de Angular ni infraestructura.
+- `application/` solo importa de `domain/` y define interfaces (puertos).
+- `infrastructure/` implementa puertos y depende de `application/` y `domain/`.
+- `adapters/` (UI) solo usa `application/` (casos de uso) y `domain/` (modelos).
+- Prohibido: `adapters/` → `infrastructure/` directo; `domain/` → cualquier capa.
+
+## Ejemplo
+
+```typescript
+// ✅ En application: define puerto
+export interface ProductRepository {
+  list(): Promise<Product[]>;
+}
+
+// ✅ En infrastructure: implementa puerto
+export class HttpProductRepository implements ProductRepository { /* ... */ }
+```

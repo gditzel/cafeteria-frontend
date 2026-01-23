@@ -1,0 +1,25 @@
+---
+description: Arquitectura hexagonal para frontend (estructura)
+alwaysApply: true
+---
+
+# Arquitectura hexagonal (frontend)
+
+- Usar capas claras: `domain/`, `application/`, `infrastructure/`, `adapters/`.
+- `domain/` contiene entidades, value objects y contratos puros (sin Angular).
+- `application/` define casos de uso y puertos (interfaces) y depende solo de `domain/`.
+- `infrastructure/` implementa puertos (HTTP, storage) y depende de `application/` y `domain/`.
+- `adapters/` es la UI (Angular components, routes, pages) y depende de `application/`.
+- Evitar importaciones cruzadas entre capas laterales (p.ej. `adapters/` → `infrastructure/` directo).
+
+## Estructura sugerida
+
+```
+src/app/
+  domain/
+  application/
+  infrastructure/
+  adapters/
+```
+
+Si una carpeta no encaja, crearla en la capa correcta en vez de mezclar.

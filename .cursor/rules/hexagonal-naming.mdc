@@ -1,0 +1,21 @@
+---
+description: Convenciones de nombres y carpetas hexagonales
+alwaysApply: true
+---
+
+# Convenciones de nombres
+
+- `domain/`:
+  - Entidades: `*.entity.ts`
+  - Value objects: `*.vo.ts`
+  - Contratos: `*.repository.ts`, `*.service.ts`
+- `application/`:
+  - Casos de uso: `*.usecase.ts`
+  - DTOs: `*.dto.ts`
+  - Puertos: `*.port.ts` o `*.repository.ts`
+- `infrastructure/`:
+  - Implementaciones: `*.http.ts`, `*.storage.ts`
+- `adapters/`:
+  - UI Angular: `*.component.ts/html/css`, `*.page.ts`
+
+Mantener nombres consistentes con el dominio (p.ej. `product`, `order`).

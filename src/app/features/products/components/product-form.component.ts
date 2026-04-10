@@ -1,139 +1,121 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ProductService, CategoryDto } from '../../../services/product.service';
-import { CategoryEventsService } from '../../../services/category-events.service';
-
-interface CategoryOption {
-  id: number;
-  label: string;
-}
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ProductService } from '../../../services/product.service';
+import { CategoryService } from '../../../services/category.service';
+import { Category } from '../../models/category.model';
 
 @Component({
   selector: 'app-product-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './product-form.component.html',
+  templateUrl: './product-form.component.html'
 })
 export class ProductFormComponent implements OnInit {
-  productForm: FormGroup;
-  selectedFile: File | null = null;
+  productForm!: FormGroup;
   loading = false;
-  categories: CategoryOption[] = [];
-  categoriesError = '';
+  categories: Category[] = [];
+  selectedFile: File | null = null;
+  imagePreview: string | ArrayBuffer | null = null; // Variable para la previsualización local
+  isEditMode = false;
+  productId: number | null = null;
 
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
-    private categoryEvents: CategoryEventsService
+    private categoryService: CategoryService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
-    this.productForm = this.fb.group({
-      categoryId: [null as number | null, Validators.required],
-      nameEs: ['', Validators.required],
-      nameEn: ['', Validators.required],
-      descriptionEs: ['', Validators.required],
-      descriptionEn: ['', Validators.required],
-      price: [null as number | null, [Validators.required, Validators.min(0)]],
-      stock: [null as number | null, [Validators.required, Validators.min(0)]],
-    });
+    this.initForm();
+  }
 
-    this.categoryEvents.categoriesChanged$
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.loadCategories());
+  private initForm(): void {
+    this.productForm = this.fb.group({
+      price: [0, [Validators.required, Validators.min(0)]],
+      stock: [0, [Validators.required, Validators.min(0)]],
+      isActive: [true],
+      categoryId: [null, Validators.required],
+      nameEs: ['', Validators.required],
+      descEs: [''],
+      nameEn: ['', Validators.required],
+      descEn: ['']
+    });
   }
 
   ngOnInit(): void {
-    this.loadCategories();
+    this.categoryService.getCategories().subscribe(data => this.categories = data);
+
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      this.productId = Number(idParam);
+      this.isEditMode = true;
+      this.productService.getProductById(this.productId).subscribe({
+        next: (data) => {
+          const es = data.translations?.find(t => t.languageCode === 'es');
+          const en = data.translations?.find(t => t.languageCode === 'en');
+
+          // Seteamos la URL inicial de la imagen desde la API para el modo edición
+          this.imagePreview = `http://localhost:8080/api/products/${this.productId}/image`;
+
+          this.productForm.patchValue({
+            price: data.price,
+            stock: data.stock,
+            isActive: data.isActive,
+            categoryId: data.category?.id,
+            nameEs: es?.name || '',
+            descEs: es?.description || '',
+            nameEn: en?.name || '',
+            descEn: en?.description || ''
+          });
+        }
+      });
+    }
   }
 
-  private loadCategories(): void {
-    this.productService.getActiveCategories().subscribe({
-      next: (cats) => {
-        this.categories = cats.map((c) => ({
-          id: c.id,
-          label: categoryLabel(c),
-        }));
-        this.categoriesError =
-          this.categories.length === 0
-            ? 'No hay categorías activas. Creálas en la sección Categorías del menú superior.'
-            : '';
-      },
-      error: () => {
-        this.categoriesError =
-          'No se pudieron cargar las categorías. ¿Está el backend en http://localhost:8080?';
-      },
-    });
-  }
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0] ?? null;
-    this.selectedFile = file;
-  }
-
-  private toProductPayload(v: {
-    categoryId: number;
-    nameEs: string;
-    nameEn: string;
-    descriptionEs: string;
-    descriptionEn: string;
-    price: number;
-    stock: number;
-  }): object {
-    return {
-      isActive: true,
-      price: v.price,
-      stock: v.stock,
-      category: { id: v.categoryId },
-      translations: [
-        { languageCode: 'es', name: v.nameEs.trim(), description: v.descriptionEs.trim() },
-        { languageCode: 'en', name: v.nameEn.trim(), description: v.descriptionEn.trim() },
-      ],
-    };
+      // Generar previsualización inmediata usando FileReader
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   onSubmit(): void {
-    if (this.productForm.invalid || !this.selectedFile) {
-      alert('Por favor, completa todos los campos (incluida la categoría) y selecciona una imagen.');
+    if (this.productForm.invalid) {
+      this.productForm.markAllAsTouched();
       return;
     }
 
-    const raw = this.productForm.getRawValue();
-    const payload = this.toProductPayload({
-      categoryId: raw.categoryId,
-      nameEs: raw.nameEs,
-      nameEn: raw.nameEn,
-      descriptionEs: raw.descriptionEs,
-      descriptionEn: raw.descriptionEn,
-      price: Number(raw.price),
-      stock: Number(raw.stock),
-    });
-
     this.loading = true;
-    this.productService.uploadProduct(payload, this.selectedFile).subscribe({
-      next: () => {
-        alert('¡Producto guardado con éxito!');
-        this.productForm.reset({ categoryId: null });
-        this.selectedFile = null;
-        this.loading = false;
-      },
+    const val = this.productForm.value;
+
+    const productToSave = {
+      id: this.isEditMode ? this.productId : null,
+      price: val.price,
+      stock: val.stock,
+      isActive: val.isActive,
+      category: { id: Number(val.categoryId) },
+      translations: [
+        { languageCode: 'es', name: val.nameEs, description: val.descEs },
+        { languageCode: 'en', name: val.nameEn, description: val.descEn }
+      ]
+    };
+
+    this.productService.saveProduct(productToSave, this.selectedFile).subscribe({
+      next: () => this.router.navigate(['/admin/productos']),
       error: (err) => {
-        console.error('Error al subir producto', err);
-        const msg =
-          err?.error?.message ??
-          (typeof err?.error === 'string' ? err.error : null) ??
-          'Revisá la consola del backend (Java) para el detalle.';
-        alert(`Error al guardar: ${msg}`);
+        console.error('Error al guardar:', err);
         this.loading = false;
-      },
+        alert("Error al guardar: Verifica los logs del servidor.");
+      }
     });
   }
-}
-
-function categoryLabel(c: CategoryDto): string {
-  const tr = c.translations ?? [];
-  const es = tr.find((t) => t.languageCode === 'es');
-  const any = tr[0];
-  return es?.name ?? any?.name ?? `Categoría #${c.id}`;
 }

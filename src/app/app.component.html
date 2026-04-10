@@ -1,1 +1,11 @@
-<router-outlet />
+<div class="min-h-screen bg-gray-50 flex flex-col">
+  <app-navbar></app-navbar>
+
+  <main class="flex-grow container mx-auto py-6 px-4">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="bg-white border-t py-4 text-center text-gray-400 text-sm italic">
+    &copy; 2026 Sistema de Gestión Interna - Cafetería Admin
+  </footer>
+</div>

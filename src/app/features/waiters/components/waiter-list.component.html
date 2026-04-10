@@ -1,0 +1,68 @@
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-8">
+    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Gestión de Mozos</h2>
+    <button (click)="goToCreate()"
+            class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-all active:scale-95">
+      + Nuevo Mozo
+    </button>
+  </div>
+
+  <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+    <table class="min-w-full divide-y divide-slate-200">
+      <thead class="bg-slate-50">
+      <tr>
+        <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Nombre de Usuario</th>
+        <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Email</th>
+        <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Estado</th>
+        <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest">Acciones</th>
+      </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200">
+      <tr *ngFor="let w of waiters" class="hover:bg-slate-50 transition-colors">
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold">
+              {{ w.username.substring(0,1).toUpperCase() }}
+            </div>
+            <span class="font-bold text-slate-900">{{ w.username }}</span>
+          </div>
+        </td>
+        <td class="px-6 py-4 text-slate-600 font-medium">{{ w.email }}</td>
+        <td class="px-6 py-4">
+            <span [class]="w.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"
+                  class="px-3 py-1 rounded-full text-xs font-black uppercase">
+              {{ w.isActive ? 'Activo' : 'Inactivo' }}
+            </span>
+        </td>
+        <td class="px-6 py-4 text-center">
+          <div class="flex justify-center gap-3">
+            <button (click)="goToEdit(w.id!)" class="text-blue-500 hover:text-blue-700 text-xl transition-transform hover:scale-125">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button (click)="openDeleteModal(w.id!)" class="text-red-500 hover:text-red-700 text-xl transition-transform hover:scale-125">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeDeleteModal()"></div>
+  <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative z-10 border-t-8 border-red-500 transform transition-all animate-in fade-in zoom-in duration-200">
+    <div class="text-center">
+      <div class="bg-red-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-user-minus text-red-600 text-3xl"></i>
+      </div>
+      <h3 class="text-2xl font-black text-slate-800 mb-2">¿Eliminar Mozo?</h3>
+      <p class="text-slate-500 mb-8 text-sm font-medium">Esta acción quitará el acceso al sistema para este usuario permanentemente.</p>
+    </div>
+    <div class="flex gap-4">
+      <button (click)="closeDeleteModal()" class="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">Cancelar</button>
+      <button (click)="confirmDelete()" class="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-lg transition-all">Sí, Eliminar</button>
+    </div>
+  </div>
+</div>
